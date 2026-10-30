@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VizNDatPilot AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,560&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+    --bg:#F4F7FB;
+    --bg-soft:#EEF4F9;
+    --primary:#2563EB;
+    --primary-hover:#1D4ED8;
+    --accent:#14B8A6;
+    --text:#0F172A;
+    --text-soft:#334155;
+    --muted:#64748B;
+    --line:#D9E3EE;
+    --panel:#FFFFFF;
+    --panel-soft:#F8FBFE;
+    --radius:18px;
+    --radius-sm:12px;
+    --shadow:0 18px 40px rgba(15,23,42,.08);
+    --shadow-soft:0 10px 24px rgba(15,23,42,.06);
+    --focus-ring:0 0 0 4px rgba(37,99,235,.12);
+
+    --success:#059669;
+    --success-bg:#ECFDF5;
+    --error:#DC2626;
+    --error-bg:#FEF2F2;
+    --info:#2563EB;
+    --info-bg:#EFF6FF;
+  }
+
+    *{box-sizing:border-box}
+    body{
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    body{
+      font-family:Inter,"Microsoft YaHei","PingFang SC","Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(37,99,235,.08), transparent 24%),
+        radial-gradient(circle at left top, rgba(20,184,166,.06), transparent 18%),
+        linear-gradient(180deg, #F7FAFD 0%, #EEF4F9 100%);
+      padding:20px;
+      overflow:hidden;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .container{
+      max-width:1800px;
+      margin:0 auto;
+      height:calc(100vh - 40px);
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      gap:20px;
+    }
+
+    .header{
+      background:rgba(255,255,255,.82);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      border:1px solid rgba(255,255,255,.7);
+      border-radius:20px;
+      box-shadow:0 10px 30px rgba(15,23,42,.08);
+      padding:18px 22px;
+      position:relative;
+      overflow:hidden;
+    }
+    .header::after{
+      content:"";
+      position:absolute;
+      right:-30px;
+      top:-30px;
+      width:140px;
+      height:140px;
+      background:radial-gradient(circle, rgba(37,99,235,.10) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .header h1{
+  font-size:23px;
+  font-weight:700;
+  color:var(--primary);
+  margin-bottom:2px;
+  letter-spacing:.1px;
+  position:relative;
+  z-index:1;
+  line-height:1.2;
+}
+    .header p{
+      color:var(--muted);
+      font-size:14px;
+      position:relative;
+      z-index:1;
+      line-height:1.6;
+    }
+
+    .main{
+      flex:1;
+      min-height:0;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:20px;
+      align-items:stretch;
+      overflow:hidden;
+    }
+
+    .left-column,.right-column{
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      gap:20px;
+      overflow:auto;
+      scrollbar-width:thin;
+    }
+    .left-column::-webkit-scrollbar,
+    .right-column::-webkit-scrollbar{width:8px}
+    .left-column::-webkit-scrollbar-thumb,
+    .right-column::-webkit-scrollbar-thumb{
+      background:#BFD2E4;border-radius:10px;
+    }
+
+    .panel{
+      background:rgba(255,255,255,.88);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      border:1px solid rgba(255,255,255,.75);
+      border-radius:20px;
+      box-shadow:var(--shadow-soft);
+      padding:20px;
+      min-height:0;
+      transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+
+    .panel:hover{
+      transform:translateY(-1px);
+      box-shadow:var(--shadow);
+      border-color:#E4ECF5;
+    }
+
+    .panel h2{
+      font-size:16px;
+      font-weight:700;
+      margin-bottom:14px;
+      padding-bottom:10px;
+      border-bottom:1px solid #E7EEF6;
+      color:#111827;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .upload-panel{flex:0 0 auto;}
+    .settings-panel{flex:0 0 auto;}
+
+    .chat-panel{
+      flex:1 1 auto;
+      min-height:520px;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+
+    .upload-area{
+  border:1.8px dashed #A8BFD8;
+  background:linear-gradient(180deg,#FAFCFF 0%,#F3F8FD 100%);
+  border-radius:18px;
+  text-align:center;
+  padding:32px 16px;
+  cursor:pointer;
+  transition:all .22s ease;
+  user-select:none;
+}
+
+.upload-area:hover{
+  border-color:var(--primary);
+  transform:translateY(-2px);
+  background:#EEF5FF;
+  box-shadow:0 0 0 4px rgba(37,99,235,.08);
+}
+
+.upload-area .plus{
+  width:56px;
+  height:56px;
+  margin:0 auto 12px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+  color:var(--primary);
+  background:linear-gradient(135deg,#EAF2FF 0%,#F3F8FF 100%);
+  box-shadow:inset 0 0 0 1px #D9E8FF;
+  line-height:1;
+}
+    .upload-area p{color:var(--muted);font-size:13px;margin:4px 0}
+    .upload-area p strong{color:#111827}
+    input[type="file"]{display:none}
+
+    .settings{
+      background:#FAFAFA;
+      border:1px solid #F0F0F0;
+      border-radius:12px;
+      padding:14px;
+    }
+    .setting-row{margin-bottom:12px}
+    .setting-row:last-child{margin-bottom:0}
+    .setting-row label{
+      display:block;
+      margin-bottom:6px;
+      font-size:13px;
+      font-weight:600;
+      color:#374151;
+    }
+    .setting-row input,.setting-row select{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:11px 12px;
+      font-size:14px;
+      outline:none;
+      transition:border-color .2s, box-shadow .2s, background .2s;
+      background:#fff;
+    }
+    .setting-row input:focus,.setting-row select:focus{
+      border-color:var(--primary);
+      box-shadow:var(--focus-ring);
+      background:#fff;
+    }
+
+    .btn{
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
+  color:#fff;
+  font-weight:700;
+  padding:11px 16px;
+  cursor:pointer;
+  transition:all .2s ease;
+  font-size:14px;
+  box-shadow:0 8px 18px rgba(37,99,235,.20);
+}
+
+.btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 12px 24px rgba(37,99,235,.24);
+  filter:brightness(.98);
+}
+
+.btn:active{
+  transform:translateY(0);
+}
+
+.btn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+.btn-full{width:100%}
+
+/* 新增：配置按钮同一行 */
+.config-btn-row{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+
+.config-btn-row .btn{
+  flex:1;
+  width:auto;
+  white-space:nowrap;
+  padding:11px 12px;
+  font-size:13px;
+}
+
+.btn-test{
+  background:linear-gradient(180deg, #14B8A6 0%, #0F766E 100%);
+}
+
+.btn-custom{
+  background:linear-gradient(180deg, #F59E0B 0%, #D97706 100%);
+}
+
+    .chat-box{
+      flex:1;
+      min-height:0;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#FCFCFD;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+    .quick-prompts{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      padding:12px 12px 0;
+      border-bottom:1px solid #EEF2F7;
+    }
+
+    .prompt-chip{
+      border:1px solid #D9E4EE;
+      background:#FFFFFF;
+      color:#3B4D63;
+      border-radius:999px;
+      padding:7px 12px;
+      font-size:12px;
+      cursor:pointer;
+      transition:all .18s ease;
+    }
+
+    .prompt-chip:hover{
+      background:#F2F8FF;
+      border-color:#B7D1F5;
+      color:#1D4ED8;
+    }
+    .chat-messages{
+      flex:1;
+      min-height:0;
+      overflow-y:auto;
+      overflow-x:hidden;
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      scrollbar-width:thin;
+    }
+    .chat-messages::-webkit-scrollbar{width:8px}
+    .chat-messages::-webkit-scrollbar-thumb{
+      background:#BFD2E4;
+      border-radius:10px;
+    }
+
+    .message{
+      max-width:84%;
+      border-radius:16px;
+      padding:11px 14px;
+      white-space:pre-wrap;
+      word-break:break-word;
+      font-size:13px;
+      line-height:1.6;
+    }
+    .message.user{
+      margin-left:auto;
+      background:linear-gradient(135deg,#2563EB 0%,#3B82F6 100%);
+      color:#fff;
+      box-shadow:0 8px 18px rgba(37,99,235,.18);
+      border-bottom-right-radius:6px;
+    }
+    .message.bot{
+      margin-right:auto;
+      background:#FFFFFF;
+      border:1px solid #E2EAF2;
+      color:#0F172A;
+      box-shadow:0 4px 12px rgba(15,23,42,.04);
+      border-bottom-left-radius:6px;
+    }
+    .chat-input-area{
+  border-top:1px solid #E5E7EB;
+  padding:10px;
+  display:flex;
+  gap:8px;
+  background:#FFFFFF;
+  flex:0 0 auto;
+}
+
+.chat-input-area input{
+  flex:1;
+  border:1px solid #D1D5DB;
+  border-radius:10px;
+  padding:10px 12px;
+  font-size:14px;
+  outline:none;
+  background:#FFFFFF;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+
+.chat-input-area input:focus{
+  border-color:#7FA7C8;
+  box-shadow:0 0 0 3px #E8F1F8;
+}
+
+    .charts-panel{
+      flex:1 1 auto;
+      min-height:360px;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+
+    .charts-grid{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    border:1px solid #E6ECF2;
+    background:linear-gradient(180deg,#F8FAFD 0%, #F3F7FB 100%);
+    border-radius:12px;
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    scrollbar-width:thin;
+  }
+
+    .chart-category{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .chart-category-title{
+    position:sticky;
+    top:-1px;
+    z-index:1;
+    background:#F4F8FC;
+    font-size:13px;
+    font-weight:800;
+    color:#0D4C79;
+    padding:7px 4px 6px 4px;
+    border-bottom:1px solid #D8E3EF;
+  }
+    .chart-category-title .count{
+      font-size:11px;
+      font-weight:400;
+      color:var(--muted);
+      margin-left:4px;
+    }
+    .chart-cards-wrap{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:10px;
+  }
+
+    .chart-card{
+  border:1px solid #DCE6F0;
+  border-radius:16px;
+  background:linear-gradient(180deg,#FFFFFF 0%,#FBFDFF 100%);
+  padding:12px;
+  text-align:center;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all .18s ease;
+  user-select:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:76px;
+  color:#1E293B;
+  line-height:1.45;
+}
+
+.chart-card:hover{
+  border-color:#93C5FD;
+  background:#F4F9FF;
+  transform:translateY(-2px);
+  box-shadow:0 12px 22px rgba(37,99,235,.10);
+}
+
+.chart-card.selected{
+  border-color:#2563EB;
+  background:linear-gradient(180deg,#EEF4FF 0%, #E8F0FF 100%);
+  box-shadow:
+    0 0 0 2px #D6E4FF inset,
+    0 10px 20px rgba(37,99,235,.14);
+  font-weight:700;
+  color:#1D4ED8;
+}
+
+    .actions{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+    .hint{font-size:12px;color:#4B5563;background:#F3F4F6;border:1px dashed #CBD5E1;border-radius:8px;padding:8px 10px}
+
+    .status{
+      border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.4;border-left:4px solid transparent;
+    }
+    .status.success{background:var(--success-bg);color:var(--success);border-left-color:#10B981}
+    .status.error{background:var(--error-bg);color:var(--error);border-left-color:#EF4444}
+    .status.info{background:var(--info-bg);color:var(--info);border-left-color:#3B82F6}
+
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+    .modal.show{display:flex}
+    .modal-content{
+      background:#fff;
+      border-radius:18px;
+      padding:28px;
+      max-width:500px;
+      width:90%;
+      box-shadow:0 30px 60px rgba(0,0,0,.20);
+      border:1px solid #EEF2F7;
+    }
+    .modal-input{margin-bottom:16px}
+    .modal-input label{display:block;margin-bottom:6px;font-size:13px;font-weight:600}
+    .modal-input input{width:100%;border:1px solid #E5E7EB;border-radius:10px;padding:10px 12px}
+    .modal-buttons{display:flex;gap:10px}
+    .modal-buttons button{flex:1;border:none;border-radius:10px;padding:11px 16px;cursor:pointer}
+    .modal-buttons .cancel{border:1px solid #E5E7EB;background:#fff}
+    .modal-buttons .confirm{background:linear-gradient(180deg, #0E6AA8 0%, var(--primary) 100%);color:#fff}
+
+    .action-row{display:flex;gap:10px}
+    .action-row .btn{flex:1}
+    .btn-health{
+      background:#1C3D32;
+      color:#F4F7F5;
+      box-shadow:none;
+    }
+    .btn-health:hover{background:#163128;box-shadow:none;filter:none;transform:none}
+    .health-panel{flex:0 0 auto;display:none;background:#F4F7F5;border:1px solid #C9D4CE}
+    .health-panel.visible{display:flex;flex-direction:column}
+    .health-panel h2{font-family:"Source Sans 3","PingFang SC","Microsoft YaHei",sans-serif;letter-spacing:0}
+    .health-sheet{color:#1C2B24;font-family:"Source Sans 3","PingFang SC","Microsoft YaHei",sans-serif}
+    .health-loading{padding:28px 4px;color:#4E6258;font-size:15px}
+    .health-error{padding:12px 0;color:#8E2F2F;font-size:15px}
+    .stamp{
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:18px 22px;
+      align-items:end;
+      padding-bottom:16px;
+      border-bottom:1px solid #1C2B24;
+    }
+    .stamp-grade{
+      font-family:Newsreader,"Songti SC",serif;
+      font-size:92px;
+      line-height:.8;
+      font-weight:560;
+      letter-spacing:-.04em;
+    }
+    .stamp[data-grade="A"] .stamp-grade{color:#1F6B4A}
+    .stamp[data-grade="B"] .stamp-grade{color:#24567A}
+    .stamp[data-grade="C"] .stamp-grade{color:#8A5A12}
+    .stamp[data-grade="D"] .stamp-grade{color:#8E2F2F}
+    .stamp-score{font-variant-numeric:tabular-nums;font-size:28px;font-weight:600;line-height:1}
+    .stamp-score span{font-size:14px;font-weight:400;color:#4E6258}
+    .stamp-meta{margin-top:8px;font-size:14px;color:#31443B;max-width:36em}
+    .dim-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 18px;margin:16px 0 4px}
+    .dim-list .dim{position:relative;border-top:1px solid #C9D4CE;padding-top:6px;cursor:help}
+    .dim-list strong{display:block;font-size:18px;font-variant-numeric:tabular-nums;font-weight:600}
+    .dim-list em{font-style:normal;color:#4E6258;font-size:12px}
+    .dim-list .dim-name{text-decoration:underline dotted;text-underline-offset:3px}
+    .dim-tip{
+      display:none;
+      position:absolute;
+      z-index:4;
+      left:0;
+      top:calc(100% + 4px);
+      width:100%;
+      min-width:12em;
+      padding:8px 10px;
+      background:#F4F7F5;
+      color:#1C2B24;
+      border:1px solid #1C2B24;
+      font-size:13px;
+      line-height:1.45;
+      font-style:normal;
+    }
+    .dim-list .dim:hover .dim-tip,
+    .dim-list .dim:focus-visible .dim-tip{display:block}
+    .sheet-block{margin-top:22px}
+    .sheet-block h3{margin:0 0 8px;font-size:15px;font-weight:600}
+    .scope-table{width:100%;border-collapse:collapse;font-size:14px}
+    .scope-table th,.scope-table td{text-align:left;padding:8px 0;border-bottom:1px solid #D5DED8;vertical-align:baseline;line-height:1.45}
+    .scope-table th{width:4.5em;padding-right:18px;font-weight:600;color:#31443B;white-space:nowrap}
+    .health-table{width:100%;border-collapse:collapse;font-size:13px}
+    .health-table th,.health-table td{text-align:left;padding:7px 8px 7px 0;border-bottom:1px solid #D5DED8;vertical-align:top}
+    .health-table th{font-weight:600;color:#31443B}
+    .sev{font-variant-numeric:tabular-nums;font-weight:600}
+    .sev-P0{color:#8E2F2F}
+    .sev-P1{color:#8A5A12}
+    .sev-P2{color:#24567A}
+    .grade-cell{font-family:Newsreader,serif;font-size:18px}
+    .prose{max-width:68ch;font-size:15px;line-height:1.65;white-space:pre-wrap}
+    .quiet{margin-top:36px}
+    .quiet + .quiet{margin-top:22px}
+    .quiet h3{margin:0 0 6px;font-size:13px;font-weight:400;color:#6A7A72}
+    .quiet p{margin:0;max-width:34em;font-size:16px;line-height:1.45;color:#1C2B24}
+    .quiet p + p{margin-top:6px}
+    .sheet-counts{margin-top:10px;font-size:14px}
+    details.appendix{margin-top:18px;font-size:13px;color:#31443B}
+    details.appendix summary{cursor:pointer}
+    .health-sheet :focus-visible{outline:2px solid #1C3D32;outline-offset:2px}
+    @media (max-width:720px){
+      .stamp{grid-template-columns:1fr}
+      .stamp-grade{font-size:72px}
+      .dim-list{grid-template-columns:1fr 1fr}
+    }
+    @media (prefers-reduced-motion:reduce){
+      .health-panel{scroll-behavior:auto}
+    }
+
+    @media (max-width:1200px){
+      body{overflow:auto;}
+      .container{height:auto;min-height:calc(100vh - 40px);}
+      .main{grid-template-columns:1fr;overflow:visible;}
+      .left-column,.right-column{overflow:visible;}
+      .chat-panel,.charts-panel{min-height:420px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>VizNDatPilot AI</h1>
+      <p>上传数据 · 数据体检 · 智能推荐图表 · 一键生成可视化</p>
+    </div>
+
+    <div class="main">
+      <div class="left-column">
+        <div class="panel upload-panel">
+          <h2>📤 上传数据</h2>
+          <div class="upload-area" id="uploadArea">
+            <div class="plus">＋</div>
+            <p><strong>点击上传，或将文件拖拽到这里</strong></p>
+            <p>支持 .xlsx / .csv，自动识别字段并推荐图表</p>
+          </div>
+          <input type="file" id="fileInput" accept=".xlsx,.csv" />
+          <div id="uploadStatus" style="margin-top:10px;"></div>
+        </div>
+
+        <div class="panel settings-panel">
+          <h2>⚙️ 配置设置</h2>
+          <div class="settings">
+            <div class="setting-row">
+              <label for="colorScheme">配色方案</label>
+              <select id="colorScheme">
+                <option value="mckinsey">McKinsey Blue（麦肯锡蓝）</option>
+                <option value="bcg">BCG Green（波士顿咨询绿）</option>
+                <option value="bain">Bain Red（贝恩红）</option>
+                <option value="ey">EY Yellow（安永黄）</option>
+              </select>
+            </div>
+            <div id="chartOptionsContainer" style="display:none;border-top:1px solid #ddd;padding-top:12px;margin-top:12px;">
+              <div style="font-size:12px;color:#666;margin-bottom:8px;">📋 图表选项</div>
+              <div id="chartOptions"></div>
+            </div>
+            <div class="setting-row">
+              <label for="provider">LLM 提供商</label>
+              <select id="provider"><option value="">加载中...</option></select>
+            </div>
+            <div class="setting-row">
+              <label for="apiKey">API 密钥</label>
+              <input type="password" id="apiKey" placeholder="请输入 API Key" />
+            </div>
+            <div class="config-btn-row">
+            <button class="btn" id="saveConfigBtn">保存配置</button>
+            <button class="btn btn-test" id="testConfigBtn">测试配置</button>
+            <button class="btn btn-custom" id="addCustomBtn">+ 添加自定义模型</button>
+          </div>
+          </div>
+        </div>
+
+        <div class="panel chat-panel">
+          <h2>💬 对话与分析</h2>
+          <div class="chat-box">
+            <div class="quick-prompts" id="quickPrompts">
+              <button class="prompt-chip">帮我分析数据结构</button>
+              <button class="prompt-chip">推荐适合的图表</button>
+              <button class="prompt-chip">找出趋势变化</button>
+              <button class="prompt-chip">识别异常值</button>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-area">
+              <input type="text" id="chatInput" placeholder="请输入你的分析需求..." />
+              <button class="btn" id="sendBtn">发送</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-column">
+        <div class="panel charts-panel">
+          <h2>📊 选择图表</h2>
+          <div class="charts-grid" id="chartsGrid"></div>
+          <div id="chartDetailBox" class="chart-detail-box" style="margin-top:12px;">
+          <div class="chart-detail-empty" id="chartDetailEmpty">
+            请选择一个图表，查看图表说明与可配置参数
+          </div>
+          <div id="chartDetailContent" style="display:none;">
+            <div class="chart-detail-title" id="chartDetailTitle"></div>
+            <div class="chart-detail-desc" id="chartDetailDesc"></div>
+            <div class="chart-detail-tags" id="chartDetailTags"></div>
+          </div>
+        </div>
+          <div class="actions">
+            <div class="hint">💡 提示：双击图表可查看详细说明；上传文件后可生成数据体检报告</div>
+            <div id="generateStatus"></div>
+            <div class="action-row">
+              <button class="btn" id="generateBtn">📊 生成图表</button>
+              <button class="btn btn-health" id="healthBtn">生成体检报告</button>
+            </div>
+          </div>
+        </div>
+        <div class="panel health-panel" id="healthPanel">
+          <h2>数据体检</h2>
+          <div id="healthLoading" class="health-loading" style="display:none">正在核对原始表的缺失、重复和格式。</div>
+          <div id="healthError" class="health-error" style="display:none"></div>
+          <div id="healthBody" class="health-sheet" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="customModelModal" class="modal">
+    <div class="modal-content">
+      <h3>添加自定义 LLM 模型</h3>
+      <div class="modal-input"><label>显示名称</label><input type="text" id="customName" placeholder="例如：我的 Claude" /></div>
+      <div class="modal-input"><label>API Base URL</label><input type="text" id="customBaseUrl" placeholder="https://api.example.com/v1" /></div>
+      <div class="modal-input"><label>模型名称（如 gpt-4）</label><input type="text" id="customModelName" placeholder="例如：gpt-4" /></div>
+      <div class="modal-input"><label>API Key</label><input type="password" id="customApiKey" placeholder="sk-..." /></div>
+      <div class="modal-buttons">
+        <button class="cancel" id="cancelCustomBtn">取消</button>
+        <button class="confirm" id="confirmCustomBtn">添加模型</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentFile = null, selectedChart = null, allCharts = [];
+
+    function setStatus(elId, type, text){
+      const el = document.getElementById(elId);
+      if (!el) return;
+      el.innerHTML = text ? `<div class="status ${type}">${text}</div>` : '';
+    }
+
+
+    function initWelcomeMessage(){
+      const box = document.getElementById('chatMessages');
+      if(box.children.length === 0){
+        addMessage(
+          "你好，我是你的 AI 图表助手 👋\n请先上传数据文件，然后告诉我你想分析什么，比如：\n• 比较不同地区的销售额\n• 查看月度趋势变化\n• 分析用户年龄分布",
+          "bot"
+        );
+      }
+    }
+
+    function addMessage(text, role){
+      const box = document.getElementById('chatMessages');
+      const msg = document.createElement('div');
+      msg.className = `message ${role}`;
+      msg.textContent = text;
+      box.appendChild(msg);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function initCharts(){
+      fetch('/api/charts').then(r=>r.json()).then(data=>{
+        allCharts = data.charts || [];
+        const grid = document.getElementById('chartsGrid');
+        grid.innerHTML = '';
+
+        // 按 category 分组
+        const cats = {};
+        allCharts.forEach(chart=>{
+          const cat = chart.category || '其他';
+          if(!cats[cat]) cats[cat] = [];
+          cats[cat].push(chart);
+        });
+
+        // 固定顺序输出各组
+        const catOrder = ['比较','趋势','占比','分布','关系','地理','金融','文本','多维','排名','周期','演变','其他'];
+        const sortedCats = [
+          ...catOrder.filter(c=>cats[c]),
+          ...Object.keys(cats).filter(c=>!catOrder.includes(c))
+        ];
+
+        sortedCats.forEach(cat=>{
+          const charts = cats[cat];
+          const section = document.createElement('div');
+          section.className = 'chart-category';
+
+          const title = document.createElement('div');
+          title.className = 'chart-category-title';
+          title.textContent = cat;
+          const count = document.createElement('span');
+          count.className = 'count';
+          count.textContent = `(${charts.length})`;
+          title.appendChild(count);
+          section.appendChild(title);
+
+          const wrap = document.createElement('div');
+          wrap.className = 'chart-cards-wrap';
+
+          charts.forEach(chart=>{
+            const card = document.createElement('div');
+            card.className = 'chart-card';
+            const zh = chart.name_zh || chart.name || '';
+            const en = chart.name_en || chart.chart_id || '';
+            card.textContent = zh && en ? `${zh}（${en}）` : (zh || en || '未命名图表');
+            const fullName = zh && en ? `${zh}（${en}）` : (zh || en || '未命名图表');
+            card.title = `${fullName}\n${chart.desc || ''}\n双击查看详情`;
+            card.dataset.chartId = chart.chart_id;
+
+            card.addEventListener('click', ()=>{
+            document.querySelectorAll('.chart-card').forEach(c=>c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedChart = chart.chart_id;
+            showChartOptions(chart);
+            updateUIState(); // 
+          });
+
+            card.addEventListener('dblclick', ()=>{
+              window.open('/chart-detail?chart_id=' + chart.chart_id, '_blank');
+            });
+
+            wrap.appendChild(card);
+          });
+
+          section.appendChild(wrap);
+          grid.appendChild(section);
+        });
+      });
+    }
+
+    function loadLLMProviders(){
+      fetch('/api/llm/list').then(r=>r.json()).then(data=>{
+        const select = document.getElementById('provider');
+        select.innerHTML = '';
+        const configs = data.configs || {};
+        Object.entries(configs).forEach(([key, cfg])=>{
+          const op = document.createElement('option');
+          op.value = key;
+          op.textContent = cfg.is_custom ? `[自定义] ${cfg.model || key}` : (cfg.provider || key);
+          select.appendChild(op);
+        });
+        if (!select.options.length) select.innerHTML = '<option value="">暂无可用提供商</option>';
+      }).catch(()=>{});
+    }
+
+    function uploadFile(file){
+      const fd = new FormData(); fd.append('file', file);
+      setStatus('uploadStatus','info','正在上传...');
+      fetch('/api/upload',{method:'POST',body:fd}).then(r=>r.json()).then(data=>{
+        if(!data.success) return setStatus('uploadStatus','error','上传失败：' + (data.error || '未知错误'));
+        currentFile = data.filepath;
+        updateUIState();
+        setStatus('uploadStatus','success',`上传成功：${file.name}（${(file.size/1024).toFixed(1)} KB）<br>${data.rows} 行，${data.columns.length} 列`);
+        addMessage(`文件上传完成：${data.rows} 行 × ${data.columns.length} 列`,'bot');
+      }).catch(e=>setStatus('uploadStatus','error','上传异常：' + e.message));
+    }
+
+    function sendMessage(){
+      const input = document.getElementById('chatInput');
+      const msg = input.value.trim();
+      if(!msg) return;
+      if(!currentFile) return alert('请先上传文件');
+      addMessage(msg,'user'); input.value = '';
+
+      const provider = document.getElementById('provider').value;
+      fetch('/api/analyze',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({filepath:currentFile,query:msg,provider})
+      }).then(r=>r.json()).then(data=>{
+        if(!data.success) return addMessage('分析失败：' + (data.error || '未知错误'),'bot');
+        addMessage(data.analysis?.summary || '分析完成','bot');
+
+        if(Array.isArray(data.recommendations) && data.recommendations.length){
+          function formatRecLabels(rec){
+            const req = new Set(rec.required_fields || []);
+            const fm = rec.field_mapping || {};
+            if(req.has('x') && req.has('y')){
+              return `数据标签：\n  X轴：${rec.x_label || fm.x || '-'}\n  Y轴：${rec.y_label || fm.y || '-'}`;
+            }
+            const entries = Object.entries(fm).filter(([_,v]) => v!=null && String(v).trim()!=='');
+            return entries.length ? '数据标签：\n' + entries.map(([k,v])=>`  ${k}：${v}`).join('\n') : '数据标签：\n  -';
+          }
+          const recText = data.recommendations.map(rec=>{
+            const zh = rec.name_zh || rec.name || '';
+            const en = rec.name_en || rec.chart_id || '';
+            return `${rec.stars || ''} ${zh}${en ? `（${en}）` : ''}\n${rec.reason || ''}\n${formatRecLabels(rec)}`;
+          }).join('\n\n---\n\n');
+          addMessage('=== 推荐图表 ===\n\n' + recText,'bot');
+        }
+      }).catch(e=>addMessage('错误：' + e.message,'bot'));
+    }
+
+    function showChartOptions(chart){
+      const detailEmpty = document.getElementById('chartDetailEmpty');
+      const detailContent = document.getElementById('chartDetailContent');
+      const detailTitle = document.getElementById('chartDetailTitle');
+      const detailDesc = document.getElementById('chartDetailDesc');
+      const detailTags = document.getElementById('chartDetailTags');
+
+      detailEmpty.style.display = 'none';
+      detailContent.style.display = 'block';
+      detailTitle.textContent = (chart.name_zh || chart.name || chart.chart_id || '未命名图表');
+      detailDesc.textContent = chart.desc || '暂无图表说明';
+      detailTags.innerHTML = `
+        <span class="chart-tag">分类：${chart.category || '其他'}</span>
+        <span class="chart-tag">图表 ID：${chart.chart_id || '-'}</span>
+      `;
+      const container = document.getElementById('chartOptionsContainer');
+      const optionsDiv = document.getElementById('chartOptions');
+      
+      if(!chart.options || chart.options.length === 0){
+        container.style.display = 'none';
+        return;
+      }
+      
+      container.style.display = 'block';
+      optionsDiv.innerHTML = '';
+      
+      chart.options.forEach(opt=>{
+        const row = document.createElement('div');
+        row.className = 'setting-row';
+        row.style.marginBottom = '8px';
+        
+        const label = document.createElement('label');
+        label.textContent = opt.label || opt.name;
+        label.style.fontSize = '12px';
+        label.style.marginBottom = '4px';
+        label.style.display = 'block';
+        row.appendChild(label);
+        
+        let control;
+        if(opt.type === 'boolean'){
+          control = document.createElement('input');
+          control.type = 'checkbox';
+          control.id = `opt_${opt.name}`;
+          control.checked = opt.default !== false;
+          control.style.marginRight = '6px';
+          const span = document.createElement('span');
+          span.textContent = opt.description || '';
+          span.style.fontSize = '11px';
+          span.style.color = '#666';
+          row.appendChild(control);
+          row.appendChild(span);
+        } else if(opt.type === 'number'){
+          control = document.createElement('input');
+          control.type = 'number';
+          control.id = `opt_${opt.name}`;
+          control.value = opt.default || 0;
+          control.style.width = '100%';
+          control.style.padding = '4px';
+          row.appendChild(control);
+        } else if(opt.type === 'select'){
+          control = document.createElement('select');
+          control.id = `opt_${opt.name}`;
+          control.style.width = '100%';
+          control.style.padding = '4px';
+          (opt.options || []).forEach(o=>{
+            const op = document.createElement('option');
+            op.value = o.value || o;
+            op.textContent = o.label || o;
+            control.appendChild(op);
+          });
+          row.appendChild(control);
+        }
+        
+        optionsDiv.appendChild(row);
+      });
+    }
+
+    function collectChartOptions(){
+      const options = {};
+      const optionInputs = document.getElementById('chartOptions').querySelectorAll('input, select');
+      optionInputs.forEach(input=>{
+        const name = input.id.replace('opt_', '');
+        if(input.type === 'checkbox'){
+          options[name] = input.checked;
+        } else {
+          options[name] = input.value;
+        }
+      });
+      return options;
+    }
+
+    function generateChart(){
+      if(!selectedChart) return alert('请先选择图表');
+      if(!currentFile) return alert('请先上传文件');
+      setStatus('generateStatus','info','正在生成...');
+
+      const colorScheme = document.getElementById('colorScheme').value || 'mckinsey';
+      const chartOptions = collectChartOptions();
+
+      fetch('/api/generate',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({filepath:currentFile,chart_type:selectedChart,color_scheme:colorScheme,options:chartOptions})
+      }).then(r=>r.json()).then(data=>{
+        if(!data.success) return setStatus('generateStatus','error','生成失败：' + (data.error || '未知错误'));
+        setStatus('generateStatus','success','生成成功，正在打开下载链接...');
+        if (data.download_url) return window.open(data.download_url, '_blank');
+        if (data.filename) return window.open(`/api/download/${data.filename}`, '_blank');
+      }).catch(e=>setStatus('generateStatus','error','生成异常：' + e.message));
+    }
+
+    function saveConfig(){
+      const provider = document.getElementById('provider').value;
+      const apiKey = document.getElementById('apiKey').value.trim();
+      if(!apiKey) return alert('请输入 API Key');
+      fetch('/api/llm/config',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({provider,api_key:apiKey})
+      }).then(r=>r.json()).then(d=>alert(d.message || '配置已保存')).catch(e=>alert('配置异常：' + e.message));
+    }
+
+    function testConfig(){
+      const provider = document.getElementById('provider').value;
+      if(!provider) return alert('请选择提供商');
+      fetch(`/api/llm/test/${provider}`,{method:'POST'}).then(r=>r.json()).then(d=>{
+        alert(d.success ? `✓ 配置有效\n提供商：${d.provider}\n模型：${d.model}` : `✗ 配置无效\n${d.message}`);
+      }).catch(e=>alert('测试异常：' + e.message));
+    }
+
+    function updateUIState(){
+      const hasFile = !!currentFile;
+      const hasChart = !!selectedChart;
+
+      const chatInput = document.getElementById('chatInput');
+      const sendBtn = document.getElementById('sendBtn');
+      const generateBtn = document.getElementById('generateBtn');
+      const healthBtn = document.getElementById('healthBtn');
+
+      chatInput.disabled = !hasFile;
+      sendBtn.disabled = !hasFile;
+      generateBtn.disabled = !(hasFile && hasChart);
+      if(healthBtn) healthBtn.disabled = !hasFile;
+
+      chatInput.placeholder = hasFile
+        ? '请输入你的分析需求（可选）...'
+        : '请先上传文件后再开始分析';
+    }
+
+    function generateHealthReport(){
+      if(!currentFile) return alert('请先上传文件');
+      const provider = document.getElementById('provider').value;
+      const query = document.getElementById('chatInput').value.trim() || '';
+      const panel = document.getElementById('healthPanel');
+      const loading = document.getElementById('healthLoading');
+      const body = document.getElementById('healthBody');
+      const err = document.getElementById('healthError');
+      panel.classList.add('visible');
+      loading.style.display = 'block';
+      body.style.display = 'none';
+      err.style.display = 'none';
+      panel.scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'nearest'});
+      fetch('/api/report',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({filepath:currentFile, provider, query, report_type:'health'})
+      }).then(r=>r.json()).then(data=>{
+        loading.style.display = 'none';
+        if(!data.success && data.error){
+          err.style.display = 'block';
+          err.textContent = '体检没有完成：' + data.error;
+          return;
+        }
+        body.style.display = 'block';
+        renderHealth(data);
+      }).catch(e=>{
+        loading.style.display = 'none';
+        err.style.display = 'block';
+        err.textContent = '体检没有完成：' + e.message;
+      });
+    }
+
+    function esc(v){
+      return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+
+    function renderHealth(data){
+      const v = data.view || {};
+      const dims = (v.dims || []).map(d => {
+        const score = d.value == null ? 'N/A' : esc(d.value);
+        const meaning = esc(d.meaning || '');
+        return `<div class="dim" tabindex="0" aria-label="${esc(d.label)} ${score}。${meaning}">
+          <em class="dim-name">${esc(d.label)}</em>
+          <strong>${score}</strong>
+          ${d.note ? `<em>${esc(d.note)}</em>` : ''}
+          ${meaning ? `<span class="dim-tip" role="tooltip">${meaning}</span>` : ''}
+        </div>`;
+      }).join('');
+      const issues = v.issues || [];
+      const issueRows = issues.map(i =>
+        `<tr><td class="sev sev-${esc(i.level)}">${esc(i.level)}</td><td>${esc(i.code)}</td><td>${esc(i.column)}</td><td>${esc(i.message)}</td><td>${i.affected_rows == null ? '—' : esc(i.affected_rows)}</td></tr>`
+      ).join('');
+      const lines = (items) => (items || []).map(t => `<p>${esc(typeof t === 'object' && t ? (t.rule || t.text || '') : t)}</p>`).join('');
+      const scopeRows = (v.scope || []).map(s => {
+        const term = s && typeof s === 'object' ? s.term : '';
+        const rule = s && typeof s === 'object' ? (s.rule || '') : s;
+        return `<tr><th scope="row">${esc(term)}</th><td>${esc(rule)}</td></tr>`;
+      }).join('');
+      const fields = v.fields || [];
+      const fieldRows = fields.map(r =>
+        `<tr><td>${esc(r.col_name)}</td><td>${esc(r.role)}</td><td>${r.missing_pct == null ? '—' : esc(r.missing_pct)}</td><td>${esc(r.n_unique)}</td><td>${r.outlier_count == null ? '—' : esc(r.outlier_count)}</td><td>${r.parse_fail_pct == null ? '—' : esc(r.parse_fail_pct)}</td><td class="grade-cell">${esc(r.field_grade)}</td></tr>`
+      ).join('');
+      document.getElementById('healthBody').innerHTML = `
+        <div class="stamp" data-grade="${esc(v.grade || 'D')}">
+          <div class="stamp-grade">${esc(v.grade || '—')}</div>
+          <div>
+            <div class="stamp-score">${esc(v.score ?? '—')} <span>/ 100</span></div>
+            <div class="stamp-meta">${esc(v.subject || '原始表')}，${esc(v.rows)} 行 × ${esc(v.cols)} 列。分数由程序计算，不代表业务真实。${v.sample_warning ? '样本不足，不做可用性推断。' : ''}</div>
+            <div class="sheet-counts">严重 ${esc(v.p0||0)}，需处理 ${esc(v.p1||0)}，提示 ${esc(v.p2||0)}。${esc(v.scored_dims||0)} 个维度计入综合分。</div>
+          </div>
+        </div>
+        <div class="dim-list">${dims}</div>
+        <section class="sheet-block">
+          <h3>检查规则</h3>
+          <table class="scope-table"><tbody>${scopeRows}</tbody></table>
+        </section>
+        <section class="sheet-block">
+          <h3>问题</h3>
+          ${issues.length ? `<table class="health-table"><thead><tr><th>级别</th><th>规则</th><th>字段</th><th>说明</th><th>影响行</th></tr></thead><tbody>${issueRows}</tbody></table>` : '<p>没有达到阈值的问题。</p>'}
+        </section>
+        <section class="sheet-block">
+          <h3>字段</h3>
+          <table class="health-table"><thead><tr><th>字段</th><th>角色</th><th>缺失%</th><th>唯一值</th><th>离群</th><th>解析失败%</th><th>评级</th></tr></thead><tbody>${fieldRows}</tbody></table>
+        </section>
+        <section class="quiet"><h3>解读</h3>${lines(v.reads)}</section>
+        <details class="appendix"><summary>计算说明与清洗对照</summary><div class="prose">${esc(v.appendix || '')}</div></details>
+      `;
+    }
+    window.renderHealth = renderHealth;
+
+    function showAddCustomModal(){ document.getElementById('customModelModal').classList.add('show'); }
+    function hideAddCustomModal(){
+      document.getElementById('customModelModal').classList.remove('show');
+      ['customName','customBaseUrl','customModelName','customApiKey'].forEach(id=>document.getElementById(id).value='');
+    }
+    function addCustomModel(){
+      const name = document.getElementById('customName').value.trim();
+      const base_url = document.getElementById('customBaseUrl').value.trim();
+      const model_name = document.getElementById('customModelName').value.trim();
+      const api_key = document.getElementById('customApiKey').value.trim();
+      if(!name || !base_url || !model_name || !api_key) return alert('请完整填写所有字段');
+
+      fetch('/api/llm/add-custom',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name,base_url,model_name,api_key})
+      }).then(r=>r.json()).then(d=>{
+        if(!d.success) return alert(`✗ 添加失败\n${d.error}`);
+        alert(`✓ 添加成功\nProvider ID：${d.provider_id}`);
+        hideAddCustomModal();
+        loadLLMProviders();
+      }).catch(e=>alert('异常：' + e.message));
+    }
+
+    window.addEventListener('load', ()=>{
+      initCharts();
+      loadLLMProviders();
+      initWelcomeMessage();
+
+      document.getElementById('sendBtn').addEventListener('click', sendMessage);
+      document.getElementById('generateBtn').addEventListener('click', generateChart);
+      document.getElementById('healthBtn').addEventListener('click', generateHealthReport);
+      document.getElementById('saveConfigBtn').addEventListener('click', saveConfig);
+      document.getElementById('testConfigBtn').addEventListener('click', testConfig);
+      document.getElementById('addCustomBtn').addEventListener('click', showAddCustomModal);
+      document.getElementById('cancelCustomBtn').addEventListener('click', hideAddCustomModal);
+      document.getElementById('confirmCustomBtn').addEventListener('click', addCustomModel);
+
+      document.getElementById('chatInput').addEventListener('keydown', e=>{
+        if(e.key==='Enter') sendMessage();
+      });
+
+      document.querySelectorAll('.prompt-chip').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const input = document.getElementById('chatInput');
+        input.value = btn.textContent;
+        sendMessage();
+        updateUIState();      // ✅ 新增：初始化按钮禁用/启用状态
+        initWelcomeMessage(); // （可选）显示欢迎语
+      });
+    });
+
+      const uploadArea = document.getElementById('uploadArea');
+      const fileInput = document.getElementById('fileInput');
+
+      uploadArea.addEventListener('click', ()=>fileInput.click());
+      uploadArea.addEventListener('dragover', e=>{ e.preventDefault(); uploadArea.style.background='#ECF3F9'; });
+      uploadArea.addEventListener('dragleave', ()=>{ uploadArea.style.background=''; });
+      uploadArea.addEventListener('drop', e=>{
+        e.preventDefault(); uploadArea.style.background='';
+        if(e.dataTransfer.files?.length) uploadFile(e.dataTransfer.files[0]);
+      });
+
+      fileInput.addEventListener('change', function(){
+        if(this.files?.length) uploadFile(this.files[0]);
+      });
+    });
+  </script>
+</body>
+</html>
